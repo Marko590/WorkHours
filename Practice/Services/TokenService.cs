@@ -10,6 +10,13 @@ namespace WorkHours.Services
 {
     public class TokenService 
     {
+        private readonly IConfiguration _config;
+
+        public TokenService(IConfiguration config)
+        {
+            _config = config;
+        }
+
         public string CreateToken(ApplicationUser user)
         {
             var claims = new List<Claim>
@@ -18,7 +25,7 @@ namespace WorkHours.Services
                 new Claim(ClaimTypes.NameIdentifier,user.Id),
                 new Claim(ClaimTypes.Email,user.Email),
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("supersecretkey12341"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor

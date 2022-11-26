@@ -20,7 +20,7 @@ namespace WorkHours.Extensions
                 .AddEntityFrameworkStores<WorkHoursContext>()
                 .AddSignInManager<SignInManager<ApplicationUser>>();
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("supersecretkey12341"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
             {
                 opt.TokenValidationParameters = new TokenValidationParameters
