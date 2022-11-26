@@ -11,7 +11,7 @@ namespace Practice.Models
     public class Admin
     {
         [Key]
-        public string Username { get; set; } = null!;
+        public string AccountName{ get; set; } = null!;
         [Required]
         [Column(TypeName = "VARCHAR(100)")]
         public string Name { get; set; }

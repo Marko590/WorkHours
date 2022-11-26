@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+
 namespace Practice.Controllers;
 
 
@@ -24,25 +26,27 @@ public class WorkersController : ControllerBase
         _logger = logger;
     }
 
-    
+
     //Add a new user
+    [Authorize]
     [HttpPut("{name}")]
     public ActionResult<List<Worker>> put(string name)
     {
         var newWorker = new Worker() { Name = name };
         context.Workers.Add(newWorker);
         context.SaveChanges();
-        
 
+        _logger.LogInformation(context.Roles.ToList().ToString());
         _logger.LogInformation("Added new worker with id={0} and Name={1} at {2:DT} ",newWorker.WorkerId,newWorker.Name,
             DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff",
             CultureInfo.InvariantCulture));
         return context.Workers.ToList();
         
     }
-    
+
 
     //Return a list of all users
+  
     [HttpGet("getWorkers")]
     public ActionResult<List<Worker>> getWorkers()
     {
@@ -50,6 +54,7 @@ public class WorkersController : ControllerBase
     }
 
     //Delete the user with the corresponding id
+    [Authorize]
     [HttpDelete("{id}")]
     public ActionResult<List<Worker>> deleteWorker(int id)
     {
@@ -67,6 +72,7 @@ public class WorkersController : ControllerBase
 
 
     // Update the user whose id is sent to the new Name
+    [Authorize]
     [HttpPatch]
     [Route("update")]
     public ActionResult<List<Worker>> update(string newName, int id)

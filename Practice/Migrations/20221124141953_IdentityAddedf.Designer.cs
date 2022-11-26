@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Practice.Data;
 
@@ -11,9 +12,11 @@ using Practice.Data;
 namespace WorkHours.Migrations
 {
     [DbContext(typeof(WorkHoursContext))]
-    partial class WorkHoursContextModelSnapshot : ModelSnapshot
+    [Migration("20221124141953_IdentityAddedf")]
+    partial class IdentityAddedf
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

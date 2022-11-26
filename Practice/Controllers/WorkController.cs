@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Practice.Controllers;
 
@@ -20,6 +21,7 @@ public class WorkController : ControllerBase
     public WorkController(ILogger<WorkersController> logger)
     {
         _logger = logger;
+        
         context = new WorkHoursContext();
     }
 
@@ -42,6 +44,7 @@ public class WorkController : ControllerBase
 
 
     //List all works in the database
+    [Authorize]
     [HttpPost("/listWork")]
     public ActionResult<List<Work>> list()
     {
