@@ -26,8 +26,18 @@ public class WorkController : ControllerBase
     }
 
 
+
+    //List all works in the database
+    [AllowAnonymous]
+    [HttpGet]
+    public ActionResult<List<Work>> list()
+    {
+        return context.Works.ToList();
+    }
+
     //Add a new task
-    [HttpPost("/addWork")]
+    [AllowAnonymous]
+    [HttpPut]
     public ActionResult<List<Work>> put(string name, int workerId, int totalHours, DateTime? endTime)
     {
 
@@ -41,19 +51,35 @@ public class WorkController : ControllerBase
             CultureInfo.InvariantCulture));
         return context.Works.ToList();
     }
-
-
-    //List all works in the database
-    [Authorize]
-    [HttpPost("/listWork")]
-    public ActionResult<List<Work>> list()
+    [AllowAnonymous]
+    [HttpDelete]
+    public ActionResult<List<Work>> delete(int workId)
     {
+
+        Work? selectedWork = context.Works.Where(x => x.WorkId == workId).First();
+        if (selectedWork is null)
+        {
+            _logger.LogWarning("Work with ID={0} not in database - {1:DT} ", workId,
+            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff",
+            CultureInfo.InvariantCulture));
+
+        }
+        context.Remove(selectedWork);
+        context.SaveChanges();
+        _logger.LogInformation("Deleted work with ID={0} - {1:DT} ", workId,
+            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff",
+            CultureInfo.InvariantCulture));
+
         return context.Works.ToList();
     }
 
 
+
+
+
+    [AllowAnonymous]
     // Read all works in the current month
-    [HttpPost("/getCurrentMonthWorks")]
+    [HttpPost("getCurrentMonthWorks")]
     public ActionResult<List<Work>> currentMonth(string name, int workerId, int totalHours)
     {
         var now=DateTime.Now;
@@ -61,9 +87,9 @@ public class WorkController : ControllerBase
         return workList;
     }
 
-
+    [AllowAnonymous]
     //List all works in the database
-    [HttpPatch("/updateWorkEnd")]
+    [HttpPatch("updateWorkEnd")]
     public ActionResult<List<Work>> update(int workId,DateTime? endTime)
     {
         endTime ??=DateTime.Now;
@@ -86,29 +112,10 @@ public class WorkController : ControllerBase
 
 
     //Delete work by id
-    [HttpDelete("/deleteWork")]
-    public ActionResult<List<Work>> delete( int workId)
-    {
-
-        Work? selectedWork = context.Works.Where(x => x.WorkId == workId).First();
-        if(selectedWork is null)
-        {
-            _logger.LogWarning("Work with ID={0} not in database - {1:DT} ",workId,
-            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff",
-            CultureInfo.InvariantCulture));
-            
-        }
-        context.Remove(selectedWork);
-        context.SaveChanges();
-        _logger.LogInformation("Deleted work with ID={0} - {1:DT} ",workId,
-            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff",
-            CultureInfo.InvariantCulture));
-
-        return context.Works.ToList();
-    }
 
 
-    [HttpPost("/finishAll")]
+    [AllowAnonymous]
+    [HttpPost("finishAll")]
     public ActionResult<dynamic> finishAll()
     {
         var query = context.Works.Where(x=>x.EndTime==null).ToList();
@@ -125,7 +132,8 @@ public class WorkController : ControllerBase
     }
 
     // Join a specific worker with all his works
-    [HttpGet("/joinByWorker/{workerId}")]
+    [AllowAnonymous]
+    [HttpGet("joinByWorker/{workerId}")]
     public ActionResult<dynamic> joinByWorker( int workerId)
     {
         var query = (from work in context.Works
@@ -137,12 +145,25 @@ public class WorkController : ControllerBase
                                   EndTime = work.EndTime }
                      ).ToList();
         
+        
         return query;
     }
+    [AllowAnonymous]
+    [HttpPost("hoursInMonth")]
+    public ActionResult<dynamic> hoursInCurrentMonth(int workerId)
+    {
+        var query = context.Works.Where(i => i.StartTime.Month == DateTime.Now.Month).ToList();
+        float sum = 0;
+        foreach(Work work in query)
+        {
+            sum += work.TotalHours;
+        }
 
-
+        return sum;
+    }
+    [AllowAnonymous]
     // Join all workers with their corresponding works
-    [HttpPost("/joinAll")]
+    [HttpPost("joinAll")]
     public ActionResult<dynamic> joinAll()
     {
         var query = (from work in context.Works
@@ -152,9 +173,9 @@ public class WorkController : ControllerBase
 
         return query;
     }
-
+    [AllowAnonymous]
     // Join a worker with all of their unfinished works
-    [HttpPost("/joinUnfinishedTasks")]
+    [HttpPost("joinUnfinishedTasks")]
     public ActionResult<dynamic> joinUnfinished(int workerId)
     {
         var query = (from work in context.Works
@@ -166,9 +187,9 @@ public class WorkController : ControllerBase
 
         return query;
     }
-
+    [AllowAnonymous]
     // List all unfinished works
-    [HttpPost("/listUnfinishedTasks")]
+    [HttpPost("listUnfinishedTasks")]
     public ActionResult<dynamic> listUnfinished()
     {
         var query = (from work in context.Works
@@ -176,6 +197,20 @@ public class WorkController : ControllerBase
                      where work.EndTime == null
                      select new { WorkerName = worker.Name, Hours = work.TotalHours, StartTime = work.StartTime, EndTime = work.EndTime }
                      ).ToList();
+
+        return query;
+    }
+
+    // List workers with unfinished tasks
+    [AllowAnonymous]
+    [HttpPost("listUnfinishedWorkers")]
+    public ActionResult<dynamic> listUnfinishedWorkers()
+    {
+        var query = (from work in context.Works
+                     join worker in context.Workers on work.WorkerId equals worker.WorkerId
+                     where work.EndTime == null
+                     select worker
+                     ).Distinct().ToList();
 
         return query;
     }

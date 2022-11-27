@@ -1,13 +1,10 @@
 ﻿using Practice.Models;
 using Practice.Services;
 using Microsoft.AspNetCore.Mvc;
-using Practice.Models;
 using Practice.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using System.Globalization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Practice.Controllers;
 
@@ -29,7 +26,7 @@ public class WorkersController : ControllerBase
 
     //Add a new user
     [Authorize]
-    [HttpPut("{name}")]
+    [HttpPut("/workers")]
     public ActionResult<List<Worker>> put(string name)
     {
         var newWorker = new Worker() { Name = name };
@@ -46,16 +43,16 @@ public class WorkersController : ControllerBase
 
 
     //Return a list of all users
-  
-    [HttpGet("getWorkers")]
+    [AllowAnonymous]
+    [HttpGet("/workers")]
     public ActionResult<List<Worker>> getWorkers()
     {
         return context.Workers.ToList();
     }
 
     //Delete the user with the corresponding id
-    [Authorize]
-    [HttpDelete("{id}")]
+    [AllowAnonymous]
+    [HttpDelete("/workers")]
     public ActionResult<List<Worker>> deleteWorker(int id)
     {
         var selectedWorker = context.Workers.Where(x => x.WorkerId == id).FirstOrDefault();
@@ -74,7 +71,7 @@ public class WorkersController : ControllerBase
     // Update the user whose id is sent to the new Name
     [Authorize]
     [HttpPatch]
-    [Route("update")]
+    [Route("/workers")]
     public ActionResult<List<Worker>> update(string newName, int id)
     {
          Worker? selectedWorker = context.Workers.Where(x => x.WorkerId == id).FirstOrDefault();
